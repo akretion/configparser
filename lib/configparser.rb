@@ -14,7 +14,7 @@ class ConfigParser < Hash
 			next if (line =~ /^(#|;)/)
 			
 			# parse out the lines of the config
-			if line =~ /^(.+?)\s*[=:]\s*(.+)$/ # handle key=value lines
+			if !(line =~ /^\s/ || line =~ /^\t/) && line =~ /^(.+?)\s*[=:]\s*(.+)$/ # handle key=value lines
 				if section
 					self[section] = {} unless self[section]
 					key = $1
@@ -26,10 +26,27 @@ class ConfigParser < Hash
 			elsif line =~ /^\[(.+?)\]/ # handle new sections
 				section = $1
 			elsif line =~ /^\s+(.+?)$/ # handle continued lines
-				if section
-					self[section][key] += " #{$1}";
-				else
-					self[key] += " #{$1}"
+                                value = $1
+                                if (line =~ /^\s/ || line =~ /^\t/)
+					if section
+						if self[section][key].is_a?(Array)
+							self[section][key] += ["#{value}"];
+						else
+							self[section][key] = [self[section][key]] + ["#{value}"]
+						end
+					else
+						if self[key].is_a?(Array)
+							self[key] += ["#{value}"]
+						else
+							self[key] = [self[key]] + ["#{value}"]
+						end
+					end					
+                                else
+					if section
+						self[section][key] += " #{$1}";
+					else
+						self[key] += " #{$1}"
+					end
 				end
 			elsif line =~ /^([\w\d\_\-]+)$/
 				if section
