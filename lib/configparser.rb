@@ -3,7 +3,7 @@ require "configparser/version"
 # DESCRIPTION: parses configuration files compatible with Python's ConfigParser
 
 class ConfigParser < Hash
-	def initialize(fname = nil)
+  def initialize(fname = nil)
     self.parse(File.open(fname, "r").each_line) if fname
   end
   
